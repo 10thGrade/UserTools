@@ -46,10 +46,10 @@ async def on_message(msg):
     if msg.content.startswith("$hello"):
         await msg.channel.send("Hello!")
 
-# Bot helloコマンド
+# Bot testコマンド
 @client.tree.command()
-async def hello(interaction: discord.Interaction):
-    await interaction.response.send_message(f"Hi, {interaction.user.mention}")
+async def test(interaction: discord.Interaction):
+    await interaction.response.send_message(f"Hello World!")
 
 # Bot addコマンド
 @client.tree.command()
