@@ -12,6 +12,8 @@ GUILD_ID = discord.Object(id=os.getenv("GUILD_ID"))
 PERMISSION_ROLE = list(map(int, os.getenv("PERMISSION_ROLE", "").split(",")))
 LOG_CHANNEL_ID = int(os.getenv("LOG_CHANNEL_ID"))
 
+jst = timezone(timedelta(hours=9))
+
 # Bot 初期設定
 class UserTools(discord.Client):
     def __init__(self, *, intents: discord.Intents):
@@ -34,9 +36,9 @@ client = UserTools(intents=intents)
 @client.event
 async def on_ready():
     log_channel = client.get_channel(LOG_CHANNEL_ID)
-    jst = timezone(timedelta(hours=9))
     time = datetime.now(jst).strftime("%H:%M:%S")
-    await log_channel.send(f"```[{time}] [INFO]: UserTools が起動しました。```")
+    log_message = (f"```[{time}] [INFO]: UserTools が起動しました。```")
+    await log_channel.send(log_message)
 
 # Bot メッセージ取得
 @client.event
@@ -54,40 +56,50 @@ async def test(interaction: discord.Interaction):
 # Bot whoisアプリ
 @client.tree.context_menu(name="Whois")
 async def whois(interaction: discord.Interaction, member: discord.Member):
+    await interaction.response.send_message(">>> コマンドを実行しました。", ephemeral=True)
     log_channel = client.get_channel(LOG_CHANNEL_ID)
-    await log_channel.send(f"```------------| User whois |------------\n  User: {member.name}\n  Nick: {member.display_name}\n  ID: {member.id}\n  Status: {member.desktop_status}\n  Account: {member.created_at}\n  Avatar: {member.avatar}\n-------------------------------------```")
+    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued app command: Whois```\n")
+    await log_channel.send(log_message)
+    whois_message = (
+        f"------------| User whois |------------\n"
+        f"  User: {member.name}\n"
+        f"  Nick: {member.display_name}\n"
+        f"  ID: {member.id}\n"
+        f"  Status: {member.desktop_status}\n"
+        f"  Account: {member.created_at}\n"
+        f"  Avatar: {member.avatar}\n"
+        f"-------------------------------------"
+    )
+    await log_channel.send(whois_message)
 
 # Bot ピン留めアプリ
 @client.tree.context_menu(name="Pinning")
 async def pinning(interaction: discord.Interaction, message: discord.Message):
     user_roles = [role.id for role in interaction.user.roles]
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
+    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued app command: Pinning```\n")
+    await log_channel.send(log_message)
     
     if not any(role_id in user_roles for role_id in PERMISSION_ROLE):
-        await interaction.response.send_message("このコマンドを実行する権限がありません。", ephemeral=True)
+        await interaction.response.send_message(">>> このコマンドを実行する権限がありません。", ephemeral=True)
+        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+        log_message = (f"```[{time}] [ERROR]: {interaction.user.name} does not have permission to use this command.```")
+        await log_channel.send(log_message)
         return
+    
     if message.pinned:
-        await interaction.response.send_message("このメッセージはすでにピン留めされています。", ephemeral=True)
+        await interaction.response.send_message(">>> このメッセージはすでにピン留めされています。", ephemeral=True)
+        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+        log_message = (f"```[{time}] [ERROR]: This message has already been pinned.```")
+        await log_channel.send(log_message)
         return
+    
     await message.pin()
-    await interaction.response.send_message("メッセージをピン留めしました。", ephemeral=True)
-    log_channel = client.get_channel(LOG_CHANNEL_ID)
-    if log_channel is None:
-        return  # ログチャンネルが見つからない場合は何もしない
-
-    # JST（日本標準時）での時刻を取得
-    jst = timezone(timedelta(hours=9))
-    pinned_time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
-
-    # ログメッセージの作成
-    log_message = (
-        f"📌 **ピン留めが実行されました** 📌\n"
-        f"**実行者**: {interaction.user.mention} (`{interaction.user.id}`)\n"
-        f"**チャンネル**: {message.channel.mention}\n"
-        f"**ピン留めしたメッセージ**: [ジャンプ]({message.jump_url})\n"
-        f"**日時**: `{pinned_time}`"
-    )
-
-    # ログチャンネルにメッセージを送信
+    await interaction.response.send_message(">>> メッセージをピン留めしました。", ephemeral=True)
+    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} pinned the message.```")
     await log_channel.send(log_message)
 
 client.run(DISCORD_TOKEN)
