@@ -51,15 +51,6 @@ async def on_message(msg):
 async def test(interaction: discord.Interaction):
     await interaction.response.send_message(f"Hello World!")
 
-# Bot addコマンド
-@client.tree.command()
-@app_commands.describe(
-    first_value="the first value",
-    second_value="the second value"
-)
-async def add(interaction: discord.Interaction, first_value: int, second_value: int):
-    await interaction.response.send_message(f"{first_value} + {second_value} = {first_value + second_value}")
-
 # Bot 挨拶アプリ
 @client.tree.context_menu(name="挨拶")
 async def greeting(interaction: discord.Interaction, member: discord.Member):
