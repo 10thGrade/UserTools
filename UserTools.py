@@ -9,8 +9,8 @@ load_dotenv()
 # 環境変数取得
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GUILD_ID = discord.Object(id=os.getenv("GUILD_ID"))
-PERMISSION_ROLE = os.getenv("PERMISSION_ROLE")
-LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
+PERMISSION_ROLE = int(os.getenv("PERMISSION_ROLE"))
+LOG_CHANNEL_ID = int(os.getenv("LOG_CHANNEL_ID"))
 
 # Bot 初期設定
 class UserTools(discord.Client):
@@ -52,12 +52,13 @@ async def test(interaction: discord.Interaction):
     await interaction.response.send_message(f"Hello World!")
 
 # Bot 挨拶アプリ
-@client.tree.context_menu(name="挨拶")
-async def greeting(interaction: discord.Interaction, member: discord.Member):
-    await interaction.response.send_message(f"this is {member.name} !!")
+@client.tree.context_menu(name="Whois")
+async def whois(interaction: discord.Interaction, member: discord.Member):
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
+    await log_channel.send(f"```------------| User whois |------------\n  User: {member.name}\n  Nick: {member.display_name}\n  ID: {member.id}\n  Status: {member.desktop_status}\n  Account: {member.created_at}\n  Avatar: {member.avatar}\n-------------------------------------```")
 
 # Bot ピン留めアプリ
-@client.tree.context_menu(name="ピン留め")
+@client.tree.context_menu(name="Pinning")
 async def pinning(interaction: discord.Interaction, message: discord.Message):
     user_roles = [role.id for role in interaction.user.roles]
     
