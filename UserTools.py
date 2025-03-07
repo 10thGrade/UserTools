@@ -51,7 +51,7 @@ async def on_message(msg):
 async def test(interaction: discord.Interaction):
     await interaction.response.send_message(f"Hello World!")
 
-# Bot 挨拶アプリ
+# Bot whoisアプリ
 @client.tree.context_menu(name="Whois")
 async def whois(interaction: discord.Interaction, member: discord.Member):
     log_channel = client.get_channel(LOG_CHANNEL_ID)
