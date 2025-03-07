@@ -8,7 +8,7 @@ load_dotenv()
 
 # 環境変数取得
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-MY_GUILD = discord.Object(id=os.getenv("MY_GUILD"))
+GUILD_ID = discord.Object(id=os.getenv("GUILD_ID"))
 PERMISSION_ROLE = os.getenv("PERMISSION_ROLE")
 LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
 
@@ -19,8 +19,8 @@ class UserTools(discord.Client):
         self.tree = app_commands.CommandTree(self)
     
     async def setup_hook(self):
-        self.tree.copy_global_to(guild=MY_GUILD)
-        await self.tree.sync(guild=MY_GUILD)
+        self.tree.copy_global_to(guild=GUILD_ID)
+        await self.tree.sync(guild=GUILD_ID)
 
 intents = discord.Intents.default()
 intents.message_content = True
