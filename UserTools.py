@@ -9,7 +9,7 @@ load_dotenv()
 # 環境変数取得
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GUILD_ID = discord.Object(id=os.getenv("GUILD_ID"))
-PERMISSION_ROLE = int(os.getenv("PERMISSION_ROLE"))
+PERMISSION_ROLE = list(map(int, os.getenv("PERMISSION_ROLE", "").split(",")))
 LOG_CHANNEL_ID = int(os.getenv("LOG_CHANNEL_ID"))
 
 # Bot 初期設定
@@ -62,7 +62,7 @@ async def whois(interaction: discord.Interaction, member: discord.Member):
 async def pinning(interaction: discord.Interaction, message: discord.Message):
     user_roles = [role.id for role in interaction.user.roles]
     
-    if PERMISSION_ROLE not in user_roles:
+    if not any(role_id in user_roles for role_id in PERMISSION_ROLE):
         await interaction.response.send_message("このコマンドを実行する権限がありません。", ephemeral=True)
         return
     if message.pinned:
