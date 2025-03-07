@@ -33,7 +33,10 @@ client = UserTools(intents=intents)
 # Bot 起動時処理
 @client.event
 async def on_ready():
-    print(f"Bot have logged in as {client.user}")
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
+    jst = timezone(timedelta(hours=9))
+    time = datetime.now(jst).strftime("%H:%M:%S")
+    await log_channel.send(f"```[{time}] [INFO]: UserTools が起動しました。```")
 
 # Bot メッセージ取得
 @client.event
