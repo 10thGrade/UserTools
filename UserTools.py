@@ -51,16 +51,29 @@ async def on_message(msg):
 # Bot testコマンド
 @client.tree.command()
 async def test(interaction: discord.Interaction):
-    await interaction.response.send_message(f"Hello World!")
+    await interaction.response.send_message(f"Hello World!", ephemeral=True)
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
+    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued command: test```\n")
+    await log_channel.send(log_message)
 
 # Bot whoisアプリ
 @client.tree.context_menu(name="Whois")
 async def whois(interaction: discord.Interaction, member: discord.Member):
-    await interaction.response.send_message(">>> コマンドを実行しました。", ephemeral=True)
+    
+    user_roles = [role.id for role in interaction.user.roles]
     log_channel = client.get_channel(LOG_CHANNEL_ID)
     time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued app command: Whois```\n")
     await log_channel.send(log_message)
+    
+    if not any(role_id in user_roles for role_id in PERMISSION_ROLE):
+        await interaction.response.send_message(">>> このコマンドを実行する権限がありません。", ephemeral=True)
+        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+        log_message = (f"```[{time}] [ERROR]: {interaction.user.name} does not have permission to use this command.```")
+        await log_channel.send(log_message)
+        return
+    
     whois_message = (
         f"------------| User whois |------------\n"
         f"  User: {member.name}\n"
@@ -71,28 +84,22 @@ async def whois(interaction: discord.Interaction, member: discord.Member):
         f"  Avatar: {member.avatar}\n"
         f"-------------------------------------"
     )
+    await interaction.response.send_message(">>> コマンドを実行しました。", ephemeral=True)
     await log_channel.send(whois_message)
 
 # Bot ピン留めアプリ
 @client.tree.context_menu(name="Pinning")
 async def pinning(interaction: discord.Interaction, message: discord.Message):
-    user_roles = [role.id for role in interaction.user.roles]
     log_channel = client.get_channel(LOG_CHANNEL_ID)
     time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued app command: Pinning```\n")
     await log_channel.send(log_message)
     
-    if not any(role_id in user_roles for role_id in PERMISSION_ROLE):
-        await interaction.response.send_message(">>> このコマンドを実行する権限がありません。", ephemeral=True)
-        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
-        log_message = (f"```[{time}] [ERROR]: {interaction.user.name} does not have permission to use this command.```")
-        await log_channel.send(log_message)
-        return
-    
     if message.pinned:
-        await interaction.response.send_message(">>> このメッセージはすでにピン留めされています。", ephemeral=True)
+        await message.unpin()
+        await interaction.response.send_message(">>> メッセージのピン留めを解除しました。", ephemeral=True)
         time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
-        log_message = (f"```[{time}] [ERROR]: This message has already been pinned.```")
+        log_message = (f"```[{time}] [INFO]: {interaction.user.name} unpinned the message.```")
         await log_channel.send(log_message)
         return
     
