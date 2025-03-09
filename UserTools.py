@@ -200,7 +200,7 @@ async def roll(interaction: discord.Interaction, times: int, side: int):
     await interaction.response.send_message(result_message)
     
     time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
-    log_message = (f"```[{time}] [INFO]: {interaction.user.name} rolled {times}d{side}..```")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} rolled {times}d{side}.```")
     await log_channel.send(log_message)
 
 
