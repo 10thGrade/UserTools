@@ -24,6 +24,41 @@ class UserTools(discord.Client):
         self.tree.copy_global_to(guild=GUILD_ID)
         await self.tree.sync(guild=GUILD_ID)
 
+# Recruitコマンド GUI設定
+class RecruitGUI(discord.ui.Modal):
+    def __init__(self):
+        super().__init__(title="イベント作成", timeout=None)
+        self.name = discord.ui.TextInput(label="イベントタイトル", required=True, placeholder="イベントの名称")
+        self.content = discord.ui.TextInput(label="イベント内容", style=discord.TextStyle.paragraph, required=True, placeholder="イベントの具体的説明")
+        self.date = discord.ui.TextInput(label="イベント日時", required=True, placeholder="イベントの開催日時")
+        self.people = discord.ui.TextInput(label="イベント対象", required=True, placeholder="イベントの募集対象、人数")
+        self.place = discord.ui.TextInput(label="イベント会場", required=True, placeholder="イベントの開催場所")
+        self.add_item(self.name)
+        self.add_item(self.date)
+        self.add_item(self.content)
+        self.add_item(self.people)
+        self.add_item(self.place)
+    async def on_submit(self, interaction: discord.Interaction):
+        name = self.name.value
+        content = self.content.value
+        date = self.date.value
+        people = self.people.value
+        place = self.place.value
+        await interaction.response.send_message(
+            f"## 【イベント告知】\n"
+            f"## {name}\n"
+            f"### 概要\n"
+            f"{content}\n"
+            f"### 日時\n"
+            f"{date}\n"
+            f"### 対象\n"
+            f"{people}\n"
+            f"### 会場\n"
+            f"{place}\n"
+            f"### 担当\n"
+            f"{interaction.user.mention}"
+            )
+
 intents = discord.Intents.default()
 intents.message_content = True
 # intents.guilds = True  
@@ -107,6 +142,15 @@ async def pinning(interaction: discord.Interaction, message: discord.Message):
     await interaction.response.send_message(">>> メッセージをピン留めしました。", ephemeral=True)
     time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} pinned the message.```")
+    await log_channel.send(log_message)
+
+# Bot recruitコマンド
+@client.tree.command()
+async def recruit(interaction: discord.Interaction):
+    await interaction.response.send_modal(RecruitGUI())
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
+    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued command: recruit```\n")
     await log_channel.send(log_message)
 
 client.run(DISCORD_TOKEN)
