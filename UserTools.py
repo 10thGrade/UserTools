@@ -79,7 +79,7 @@ client = UserTools(intents=intents)
 @client.event
 async def on_ready():
     log_channel = client.get_channel(LOG_CHANNEL_ID)
-    time = datetime.now(jst).strftime("%H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: UserTools is now enabled.```")
     await log_channel.send(log_message)
 
@@ -96,7 +96,7 @@ async def on_ready():
 async def test(interaction: discord.Interaction):
     await interaction.response.send_message(f"Hello World!", ephemeral=True)
     log_channel = client.get_channel(LOG_CHANNEL_ID)
-    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued command: test```\n")
     await log_channel.send(log_message)
 
@@ -106,13 +106,13 @@ async def whois(interaction: discord.Interaction, member: discord.Member):
     
     user_roles = [role.id for role in interaction.user.roles]
     log_channel = client.get_channel(LOG_CHANNEL_ID)
-    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued app command: Whois```\n")
     await log_channel.send(log_message)
     
     if not any(role_id in user_roles for role_id in PERMISSION_ROLE):
         await interaction.response.send_message(">>> このコマンドを実行する権限がありません。", ephemeral=True)
-        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+        time = get_jst_time().strftime("%H:%M:%S")
         log_message = (f"```[{time}] [ERROR]: {interaction.user.name} does not have permission to use this command.```")
         await log_channel.send(log_message)
         return
@@ -134,21 +134,21 @@ async def whois(interaction: discord.Interaction, member: discord.Member):
 @client.tree.context_menu(name="Pinning")
 async def pinning(interaction: discord.Interaction, message: discord.Message):
     log_channel = client.get_channel(LOG_CHANNEL_ID)
-    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued app command: Pinning```\n")
     await log_channel.send(log_message)
     
     if message.pinned:
         await message.unpin()
         await interaction.response.send_message(">>> メッセージのピン留めを解除しました。", ephemeral=True)
-        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+        time = get_jst_time().strftime("%H:%M:%S")
         log_message = (f"```[{time}] [INFO]: {interaction.user.name} unpinned the message.```")
         await log_channel.send(log_message)
         return
     
     await message.pin()
     await interaction.response.send_message(">>> メッセージをピン留めしました。", ephemeral=True)
-    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} pinned the message.```")
     await log_channel.send(log_message)
 
@@ -157,7 +157,7 @@ async def pinning(interaction: discord.Interaction, message: discord.Message):
 async def recruit(interaction: discord.Interaction):
     await interaction.response.send_modal(RecruitGUI())
     log_channel = client.get_channel(LOG_CHANNEL_ID)
-    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued command: recruit```\n")
     await log_channel.send(log_message)
 
@@ -165,13 +165,13 @@ async def recruit(interaction: discord.Interaction):
 @client.tree.context_menu(name="Delete Bot Message")
 async def delete_bot_message(interaction: discord.Interaction, message: discord.Message):
     log_channel = client.get_channel(LOG_CHANNEL_ID)
-    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued app command: Delete Bot Message```\n")
     await log_channel.send(log_message)
     
     if message.author.id != client.user.id:
         await interaction.response.send_message(">>> このメッセージはボットのものではないため削除できません。", ephemeral=True)
-        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+        time = get_jst_time().strftime("%H:%M:%S")
         log_message = (f"```[{time}] [ERROR]: The message is not posted by UserTools.```")
         await log_channel.send(log_message)
         return
@@ -179,7 +179,7 @@ async def delete_bot_message(interaction: discord.Interaction, message: discord.
     await message.delete()
     await interaction.response.send_message(">>> メッセージを削除しました。", ephemeral=True)
 
-    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} deleted the message.```")
     await log_channel.send(log_message)
 
@@ -192,13 +192,13 @@ async def delete_bot_message(interaction: discord.Interaction, message: discord.
 )
 async def roll(interaction: discord.Interaction, times: int, side: int):
     log_channel = client.get_channel(LOG_CHANNEL_ID)
-    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued command: roll```\n")
     await log_channel.send(log_message)
     
     if times < 1 or times > 10 or  side < 2 or side > 100:
         await interaction.response.send_message(">>> 引数が不適です。", ephemeral=True)
-        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+        time = get_jst_time().strftime("%H:%M:%S")
         log_message = (f"```[{time}] [ERROR]: Arguments are invalid.```")
         await log_channel.send(log_message)
     
@@ -206,7 +206,7 @@ async def roll(interaction: discord.Interaction, times: int, side: int):
     result_message = f">>> コマンドを実行しました。\n>>> {', '.join(random_results)}"
     await interaction.response.send_message(result_message)
     
-    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} rolled {times}d{side}.```")
     await log_channel.send(log_message)
 
@@ -217,20 +217,20 @@ async def stop(interaction: discord.Interaction):
     
     user_roles = [role.id for role in interaction.user.roles]
     log_channel = client.get_channel(LOG_CHANNEL_ID)
-    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued command: stop```\n")
     await log_channel.send(log_message)
     
     if not any(role_id in user_roles for role_id in PERMISSION_ROLE):
         await interaction.response.send_message(">>> このコマンドを実行する権限がありません。", ephemeral=True)
-        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+        time = get_jst_time().strftime("%H:%M:%S")
         log_message = (f"```[{time}] [ERROR]: {interaction.user.name} does not have permission to use this command.```")
         await log_channel.send(log_message)
         return
 
     await interaction.response.send_message(">>> ボットの稼働を停止します。", ephemeral=True)
 
-    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} stopped UserTools.```")
     await log_channel.send(log_message)
 
