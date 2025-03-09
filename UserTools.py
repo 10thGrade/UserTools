@@ -15,6 +15,13 @@ LOG_CHANNEL_ID = int(os.getenv("LOG_CHANNEL_ID"))
 
 jst = timezone(timedelta(hours=9))
 
+def get_jst_time():
+    return datetime.now(jst)
+
+async def send_embed_log(embed: discord.Embed):
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
+    await log_channel.send(embed=embed)
+
 # Bot 初期設定
 class UserTools(discord.Client):
     def __init__(self, *, intents: discord.Intents):
@@ -76,13 +83,13 @@ async def on_ready():
     log_message = (f"```[{time}] [INFO]: UserTools is now enabled.```")
     await log_channel.send(log_message)
 
-# Bot メッセージ取得
-@client.event
-async def on_message(msg):
-    if msg.author == client.user:
-        return
-    if msg.content.startswith("$hello"):
-        await msg.channel.send("Hello!")
+# # Bot メッセージ取得
+# @client.event
+# async def on_message(msg):
+#     if msg.author == client.user:
+#         return
+#     if msg.content.startswith("$hello"):
+#         await msg.channel.send("Hello!")
 
 # Bot testコマンド
 @client.tree.command(description="UserTools の疎通確認をします。")
@@ -228,5 +235,110 @@ async def stop(interaction: discord.Interaction):
     await log_channel.send(log_message)
 
     await client.close()
+
+
+# Logging処理
+
+# メッセージ送信ログ
+@client.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    time = get_jst_time().strftime("%Y-%m-%d %H:%M:%S")
+    message_url = f"https://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}"
+    embed = discord.Embed(
+        title="Send Message",
+        color=discord.Color.blue(),
+        timestamp=get_jst_time()
+    )
+    embed.set_author(name=message.author, icon_url=message.author.avatar.url if message.author.avatar else None)
+    embed.add_field(name="User", value=f"{message.author.name} (`{message.author.id}`)", inline=False)
+    embed.add_field(name="Date", value=f"{time}")
+    embed.add_field(name="Channel", value=message.channel.mention, inline=False)
+    embed.add_field(name="Content", value=message.content[:1024], inline=False)
+    embed.add_field(name="Link", value=f"{message_url}", inline=False)
+
+    await send_embed_log(embed)
+
+
+# メッセージ編集ログ
+@client.event
+async def on_message_edit(before, after):
+    if before.author.bot:
+        return
+
+    time = get_jst_time().strftime("%Y-%m-%d %H:%M:%S")
+    message_url = f"https://discord.com/channels/{before.guild.id}/{before.channel.id}/{before.id}"
+    embed = discord.Embed(
+        title="Edit Message",
+        color=discord.Color.orange(),
+        timestamp=get_jst_time()
+    )
+    embed.set_author(name=before.author, icon_url=before.author.avatar.url if before.author.avatar else None)
+    embed.add_field(name="User", value=f"{before.author.name} (`{before.author.id}`)", inline=False)
+    embed.add_field(name="Date", value=f"{time}")
+    embed.add_field(name="Channel", value=before.channel.mention, inline=False)
+    embed.add_field(name="Before", value=before.content[:1024] if before.content else " ", inline=False)
+    embed.add_field(name="After", value=after.content[:1024] if after.content else " ", inline=False)
+    embed.add_field(name="Link", value=f"{message_url}", inline=False)
+
+    await send_embed_log(embed)
+
+# メッセージ削除ログ
+@client.event
+async def on_message_delete(message):
+    if message.author.bot:
+        return
+
+    time = get_jst_time().strftime("%Y-%m-%d %H:%M:%S")
+    message_url = f"https://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}"
+    embed = discord.Embed(
+        title="Delete Message",
+        color=discord.Color.red(),
+        timestamp=get_jst_time()
+    )
+    embed.set_author(name=message.author, icon_url=message.author.avatar.url if message.author.avatar else None)
+    embed.add_field(name="User", value=f"{message.author.name} (`{message.author.id}`)", inline=False)
+    embed.add_field(name="Date", value=f"{time}")
+    embed.add_field(name="Channel", value=message.channel.mention, inline=False)
+    embed.add_field(name="Content", value=message.content[:1024] if message.content else " ", inline=False)
+    embed.add_field(name="Link", value=f"{message_url}", inline=False)
+
+    await send_embed_log(embed)
+
+# ボイスチャンネル入室・退室ログ
+@client.event
+async def on_voice_state_update(member, before, after):
+    time = get_jst_time().strftime("%Y-%m-%d %H:%M:%S")
+
+    # 入室検知
+    if before.channel is None and after.channel is not None:
+        embed = discord.Embed(
+            title="Join Voice Channel",
+            color=discord.Color.green(),
+            timestamp=get_jst_time()
+        )
+        embed.set_author(name=member, icon_url=member.avatar.url if member.avatar else None)
+        embed.add_field(name="User", value=f"{member.name} (`{member.id}`)", inline=False)
+        embed.add_field(name="Date", value=f"{time}")
+        embed.add_field(name="Channel", value=f"`{after.channel.name}`", inline=False)
+
+        await send_embed_log(embed)
+
+    # 退室検知
+    elif before.channel is not None and after.channel is None:
+        embed = discord.Embed(
+            title="Leave Voice Channel",
+            color=discord.Color.dark_gray(),
+            timestamp=get_jst_time()
+        )
+        embed.set_author(name=member, icon_url=member.avatar.url if member.avatar else None)
+        embed.add_field(name="User", value=f"{member.name} (`{member.id}`)", inline=False)
+        embed.add_field(name="Date", value=f"{time}")
+        embed.add_field(name="Channel", value=f"`{before.channel.name}`", inline=False)
+
+        await send_embed_log(embed)
+
 
 client.run(DISCORD_TOKEN)
