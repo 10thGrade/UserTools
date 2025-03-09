@@ -3,6 +3,7 @@ from discord import app_commands
 import os
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
+import random
 
 load_dotenv()
 
@@ -173,6 +174,31 @@ async def delete_bot_message(interaction: discord.Interaction, message: discord.
 
     time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} deleted the message.```")
+    await log_channel.send(log_message)
+
+@client.tree.command()
+@app_commands.describe(
+    times = "ダイスを振る回数 (1~10)",
+    side = "ダイスの面数 (2~100)"
+)
+async def roll(interaction: discord.Interaction, times: int, side: int):
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
+    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued command: roll```\n")
+    await log_channel.send(log_message)
+    
+    if times < 1 or times > 10 or  side < 2 or side > 100:
+        await interaction.response.send_message(">>> 引数が不適です。", ephemeral=True)
+        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+        log_message = (f"```[{time}] [ERROR]: Arguments are invalid.```")
+        await log_channel.send(log_message)
+    
+    random_results = [str(random.randint(1, side)) for _ in range(times)]
+    result_message = f">>> コマンドを実行しました。\n>>> {', '.join(random_results)}"
+    await interaction.response.send_message(result_message)
+    
+    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} rolled {time}d{side}..```")
     await log_channel.send(log_message)
 
 client.run(DISCORD_TOKEN)
