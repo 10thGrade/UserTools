@@ -153,4 +153,26 @@ async def recruit(interaction: discord.Interaction):
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued command: recruit```\n")
     await log_channel.send(log_message)
 
+# Bot 投稿削除アプリ
+@client.tree.context_menu(name="Delete Bot Message")
+async def delete_bot_message(interaction: discord.Interaction, message: discord.Message):
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
+    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued app command: Delete Bot Message```\n")
+    await log_channel.send(log_message)
+    
+    if message.author.id != client.user.id:
+        await interaction.response.send_message(">>> このメッセージはボットのものではないため削除できません。", ephemeral=True)
+        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+        log_message = (f"```[{time}] [ERROR]: The message is not posted by UserTools.```")
+        await log_channel.send(log_message)
+        return
+
+    await message.delete()
+    await interaction.response.send_message(">>> メッセージを削除しました。", ephemeral=True)
+
+    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} deleted the message.```")
+    await log_channel.send(log_message)
+
 client.run(DISCORD_TOKEN)
