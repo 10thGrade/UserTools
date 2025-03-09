@@ -73,7 +73,7 @@ client = UserTools(intents=intents)
 async def on_ready():
     log_channel = client.get_channel(LOG_CHANNEL_ID)
     time = datetime.now(jst).strftime("%H:%M:%S")
-    log_message = (f"```[{time}] [INFO]: UserTools が起動しました。```")
+    log_message = (f"```[{time}] [INFO]: UserTools is now enabled.```")
     await log_channel.send(log_message)
 
 # Bot メッセージ取得
@@ -202,5 +202,31 @@ async def roll(interaction: discord.Interaction, times: int, side: int):
     time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} rolled {times}d{side}..```")
     await log_channel.send(log_message)
+
+
+# Bot stopコマンド
+@client.tree.command(description="ボットの稼働を停止します。")
+async def stop(interaction: discord.Interaction):
+    
+    user_roles = [role.id for role in interaction.user.roles]
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
+    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} issued command: stop```\n")
+    await log_channel.send(log_message)
+    
+    if not any(role_id in user_roles for role_id in PERMISSION_ROLE):
+        await interaction.response.send_message(">>> このコマンドを実行する権限がありません。", ephemeral=True)
+        time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+        log_message = (f"```[{time}] [ERROR]: {interaction.user.name} does not have permission to use this command.```")
+        await log_channel.send(log_message)
+        return
+
+    await interaction.response.send_message(">>> ボットの稼働を停止します。", ephemeral=True)
+
+    time = datetime.now(jst).strftime("%Y-%m-%d %H:%M:%S")
+    log_message = (f"```[{time}] [INFO]: {interaction.user.name} stopped UserTools.```")
+    await log_channel.send(log_message)
+
+    await client.close()
 
 client.run(DISCORD_TOKEN)
