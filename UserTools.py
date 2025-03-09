@@ -85,7 +85,7 @@ async def on_message(msg):
         await msg.channel.send("Hello!")
 
 # Bot testコマンド
-@client.tree.command()
+@client.tree.command(description="UserTools の疎通確認をします。")
 async def test(interaction: discord.Interaction):
     await interaction.response.send_message(f"Hello World!", ephemeral=True)
     log_channel = client.get_channel(LOG_CHANNEL_ID)
@@ -146,7 +146,7 @@ async def pinning(interaction: discord.Interaction, message: discord.Message):
     await log_channel.send(log_message)
 
 # Bot recruitコマンド
-@client.tree.command()
+@client.tree.command(description="イベント募集の入力テンプレートを表示します。")
 async def recruit(interaction: discord.Interaction):
     await interaction.response.send_modal(RecruitGUI())
     log_channel = client.get_channel(LOG_CHANNEL_ID)
@@ -176,7 +176,9 @@ async def delete_bot_message(interaction: discord.Interaction, message: discord.
     log_message = (f"```[{time}] [INFO]: {interaction.user.name} deleted the message.```")
     await log_channel.send(log_message)
 
-@client.tree.command()
+
+# Bot rollコマンド
+@client.tree.command(description="指定した回数分、1から指定した数までの中から乱数を返します。")
 @app_commands.describe(
     times = "ダイスを振る回数 (1~10)",
     side = "ダイスの面数 (2~100)"
