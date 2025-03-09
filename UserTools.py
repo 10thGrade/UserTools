@@ -257,6 +257,11 @@ async def on_message(message):
     embed.add_field(name="Date", value=f"{time}")
     embed.add_field(name="Channel", value=message.channel.mention, inline=False)
     embed.add_field(name="Content", value=message.content[:1024], inline=False)
+    
+    if message.attachments:
+        attachment_urls = [attachment.url for attachment in message.attachments]
+        embed.add_field(name="File", value="\n".join(attachment_urls), inline=False)
+    
     embed.add_field(name="Link", value=f"{message_url}", inline=False)
 
     await send_embed_log(embed)
@@ -279,8 +284,18 @@ async def on_message_edit(before, after):
     embed.add_field(name="User", value=f"{before.author.name} (`{before.author.id}`)", inline=False)
     embed.add_field(name="Date", value=f"{time}")
     embed.add_field(name="Channel", value=before.channel.mention, inline=False)
-    embed.add_field(name="Before", value=before.content[:1024] if before.content else " ", inline=False)
-    embed.add_field(name="After", value=after.content[:1024] if after.content else " ", inline=False)
+    embed.add_field(name="Before Content", value=before.content[:1024] if before.content else " ", inline=False)
+    
+    if before.attachments:
+        attachment_urls = [attachment.url for attachment in before.attachments]
+        embed.add_field(name="Before File", value="\n".join(attachment_urls), inline=False)
+    
+    embed.add_field(name="After Content", value=after.content[:1024] if after.content else " ", inline=False)
+    
+    if after.attachments:
+        attachment_urls = [attachment.url for attachment in after.attachments]
+        embed.add_field(name="After File", value="\n".join(attachment_urls), inline=False)
+    
     embed.add_field(name="Link", value=f"{message_url}", inline=False)
 
     await send_embed_log(embed)
@@ -303,6 +318,11 @@ async def on_message_delete(message):
     embed.add_field(name="Date", value=f"{time}")
     embed.add_field(name="Channel", value=message.channel.mention, inline=False)
     embed.add_field(name="Content", value=message.content[:1024] if message.content else " ", inline=False)
+    
+    if message.attachments:
+        attachment_urls = [attachment.url for attachment in message.attachments]
+        embed.add_field(name="File", value="\n".join(attachment_urls), inline=False)
+    
     embed.add_field(name="Link", value=f"{message_url}", inline=False)
 
     await send_embed_log(embed)
