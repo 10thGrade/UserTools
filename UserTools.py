@@ -245,7 +245,7 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    time = get_jst_time().strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     message_url = f"https://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}"
     embed = discord.Embed(
         title="Send Message",
@@ -273,7 +273,7 @@ async def on_message_edit(before, after):
     if before.author.bot:
         return
 
-    time = get_jst_time().strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     message_url = f"https://discord.com/channels/{before.guild.id}/{before.channel.id}/{before.id}"
     embed = discord.Embed(
         title="Edit Message",
@@ -306,7 +306,7 @@ async def on_message_delete(message):
     if message.author.bot:
         return
 
-    time = get_jst_time().strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
     message_url = f"https://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}"
     embed = discord.Embed(
         title="Delete Message",
@@ -330,7 +330,7 @@ async def on_message_delete(message):
 # ボイスチャンネル入室・退室ログ
 @client.event
 async def on_voice_state_update(member, before, after):
-    time = get_jst_time().strftime("%Y-%m-%d %H:%M:%S")
+    time = get_jst_time().strftime("%H:%M:%S")
 
     # 入室検知
     if before.channel is None and after.channel is not None:
